@@ -6,8 +6,6 @@ from scipy.io import wavfile
 import sounddevice as sd
 from scipy.io.wavfile import write
 
-from pynput.keyboard import Listener
-
 '''
 amplitude -> volume of a sound, specifically the wave sample of that sound
 frequency -> pitch of a sound, # of sound wave oscillations per second
