@@ -115,8 +115,17 @@ def bandstop_filter(frequencies, spectrum, min_freq, max_freq):
     
     return spectrum6+spectrum7
 
+def containsFrequency(frequencies, min_freq, max_freq):
+    for f in frequencies:
+        if f > min_freq and f < max_freq:
+            return True
+            break
+
+    return False
+
 def on_press(key):
     if key == 'r':
+        #creating 5 sec recording w/ microphone
         print("recording starting")
         fs = 44100
         seconds = 5
@@ -125,8 +134,8 @@ def on_press(key):
         write('recording.wav', fs, recorded)
         print("recording done")
 
-        # return (sample_rate and audio data)
-        input_audio = wavfile.read("Tokyo Rain Serenade.wav")
+        # return (sample_rate and audio data) from recorded .wav file
+        input_audio = wavfile.read("recording.wav")
         # how many samples per second
         sample_rate = input_audio[0] 
 
@@ -135,18 +144,51 @@ def on_press(key):
         # specifically extracts only the left channel (appplicable to stereo or headphones for example) -> explains why when playing the sound it no longer has that dimension?
         audio = np.array(channel_0, dtype=np.float64) / np.max(channel_0)
 
-        #play_audio(audio, sample_rate)
+        #play_audio(audio, sample_rate) ignore this line
         #computes floating point # representation of sample into complex coeffcients (coefficienct represents how loud a specific frequency is -> amplitude, when frequency starts in the sequence of samples)
         fourier_coefficients = np.fft.rfft(audio, norm="forward")
         frequency_spectrum =  np.fft.rfftfreq(len(audio), 1 / sample_rate)
 
-        plt.figure(figsize=(20, 5))
-        plt.plot(frequency_spectrum, bandpass_filter(frequency_spectrum, fourier_coefficients.real, 1000, 2000),)
-        plt.xlabel("frequency between 1000 and 2000 (hz)", fontsize=14)
+        #adjust frquencies here
+        medical = 250
+        rescue = 350
+        supplies = 440
 
-        plt.savefig('fft_plot.png')
-        print("Plot saved as 'fft_plot.png'")
+        med_signals = containsFrequency(frequency_spectrum, medical-1, medical+1)
+        res_signals = containsFrequency(frequency_spectrum, rescue-1, rescue+1)
+        supply_signals = containsFrequency(frequency_spectrum, supplies-1, supplies+1)
+        print(med_signals, res_signals, supply_signals)
 
+        #fig 1
+        plt.figure(figsize=(5, 5))
+        plt.plot(frequency_spectrum, bandpass_filter(frequency_spectrum, fourier_coefficients.real, medical-5, medical+5))
+        plt.xlim(0, medical+50)
+        plt.xlabel("frequency (hz)", fontsize=14)
+
+        plt.savefig('fig1.png')
+
+        #fig 2
+        plt.figure(figsize=(5, 5))
+        plt.plot(frequency_spectrum, bandpass_filter(frequency_spectrum, fourier_coefficients.real, rescue-5, rescue+5))
+        plt.xlim(0, rescue+50)
+        plt.xlabel("frequency (hz)", fontsize=14)
+
+        plt.savefig('fig2.png')
+
+        #fig 3
+        plt.figure(figsize=(5, 5))
+        plt.plot(frequency_spectrum, bandpass_filter(frequency_spectrum, fourier_coefficients.real, supplies-5, supplies+5))
+        plt.xlim(0, supplies+50)
+        plt.xlabel("frequency (hz)", fontsize=14)
+
+        plt.savefig('fig3.png')
+
+        #fig 4
+        plt.figure(figsize=(10, 5))
+        plt.plot(audio)
+        plt.xlabel("frequency (hz)", fontsize=14)
+
+        plt.savefig('fig4.png')
 while True:
     key = input("type a button: ")
     on_press(key)
