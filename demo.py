@@ -115,11 +115,12 @@ def bandstop_filter(frequencies, spectrum, min_freq, max_freq):
     
     return spectrum6+spectrum7
 
-def containsFrequency(frequencies, min_freq, max_freq):
-    for f in frequencies:
-        if f > min_freq and f < max_freq:
+def containsFrequency(frequencies, spectrum, min_freq, max_freq):
+    spectrum = bandpass_filter(frequencies, spectrum, min_freq, max_freq)
+    for f in spectrum:
+        # checking if floating point # after filteration are greater than 0, used floating point decimal for better accuracy
+        if f > 0.001:
             return True
-            break
 
     return False
 
@@ -151,18 +152,25 @@ def on_press(key):
 
         #adjust frquencies here
         medical = 250
-        rescue = 350
+        rescue = 625
         supplies = 440
 
-        med_signals = containsFrequency(frequency_spectrum, medical-1, medical+1)
-        res_signals = containsFrequency(frequency_spectrum, rescue-1, rescue+1)
-        supply_signals = containsFrequency(frequency_spectrum, supplies-1, supplies+1)
-        print(med_signals, res_signals, supply_signals)
+        med_signals = containsFrequency(frequency_spectrum, fourier_coefficients.real, medical-25, medical+25)
+        res_signals = containsFrequency(frequency_spectrum, fourier_coefficients.real, rescue-25, rescue+25)
+        supply_signals = containsFrequency(frequency_spectrum, fourier_coefficients.real, supplies-25, supplies+25)
+        
+        if med_signals == True: 
+            print("medical supplies signal recieved")
+        if res_signals == True: 
+            print("rescue signal recieved")
+        if supply_signals == True: 
+            print("resources signal recieved")
 
+        '''
+        cool stuff but irrelevant
         #fig 1
         plt.figure(figsize=(5, 5))
         plt.plot(frequency_spectrum, bandpass_filter(frequency_spectrum, fourier_coefficients.real, medical-5, medical+5))
-        plt.xlim(0, medical+50)
         plt.xlabel("frequency (hz)", fontsize=14)
 
         plt.savefig('fig1.png')
@@ -170,7 +178,6 @@ def on_press(key):
         #fig 2
         plt.figure(figsize=(5, 5))
         plt.plot(frequency_spectrum, bandpass_filter(frequency_spectrum, fourier_coefficients.real, rescue-5, rescue+5))
-        plt.xlim(0, rescue+50)
         plt.xlabel("frequency (hz)", fontsize=14)
 
         plt.savefig('fig2.png')
@@ -178,7 +185,6 @@ def on_press(key):
         #fig 3
         plt.figure(figsize=(5, 5))
         plt.plot(frequency_spectrum, bandpass_filter(frequency_spectrum, fourier_coefficients.real, supplies-5, supplies+5))
-        plt.xlim(0, supplies+50)
         plt.xlabel("frequency (hz)", fontsize=14)
 
         plt.savefig('fig3.png')
@@ -188,7 +194,9 @@ def on_press(key):
         plt.plot(audio)
         plt.xlabel("frequency (hz)", fontsize=14)
 
-        plt.savefig('fig4.png')
+        plt.savefig('fig4.png')'''
+
+
 while True:
     key = input("type a button: ")
     on_press(key)
